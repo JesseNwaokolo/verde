@@ -1,11 +1,12 @@
 import express from "express";
 import cors from "cors";
-import {clerkMiddleware} from "@clerk/express";
+import { clerkMiddleware } from "@clerk/express";
 import { clerkWebhookHandler } from "./webhooks/clerk.js";
 import { getEnv } from "./lib/env.js";
 import "dotenv/config";
 import fs from "fs";
 import path from "path";
+import job from "./lib/cron.js";
 
 const app = express();
 const env = getEnv();
@@ -20,6 +21,9 @@ app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
 
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
@@ -40,10 +44,11 @@ if (fs.existsSync(publicDir)) {
   });
 }
 
-
-
 const port = env.PORT;
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  if (env.NODE_ENV === "production") {
+    job.start();
+  }
 });
