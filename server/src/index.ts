@@ -7,6 +7,9 @@ import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import job from "./lib/cron.js";
+import meRouter from "./routes/meRouter.js";
+import productRouter from "./routes/productRouter.js";
+import streamRouter from "./routes/streamRouter.js";
 
 const app = express();
 const env = getEnv();
@@ -24,6 +27,13 @@ app.use(clerkMiddleware());
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
+
+app.use("/api/me", meRouter);
+app.use("/api/products", productRouter);
+app.use("/api/stream", streamRouter);
+// app.use("/api/checkout", chekoutRouter);
+// app.use("/api/admin", adminRouter);
+// app.use("/api/orders", orderRouter);
 
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
